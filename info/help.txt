@@ -1,0 +1,10 @@
+snake-game by - Emil Arkita
+
+Controls:
+    1) movements: arrow keys
+    2) pause: p
+    3) new game: n
+    4) quit: q
+
+Usage: ./snake [options]
+    -r --remote (server address)

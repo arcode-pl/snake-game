@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "getopt.h": "c",
+        "sdl.h": "c"
+    },
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/ea/snake-game",
+            "binaryPath": "/home/ea/snake-game/snake-game",
+            "binaryArgs": []
+        }
+    ]
+}
