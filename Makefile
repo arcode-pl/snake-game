@@ -15,19 +15,18 @@ LDFLAGS = -lSDL2 -lSDL2_ttf -lm
 APPNAME = snake-game
 EXT = .c
 SRCDIR = src
-OBJDIR = obj
 
 ############## Do not change anything from here downwards! #############
 SRC = $(wildcard $(SRCDIR)/*$(EXT))
-OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
-DEP = $(OBJ:$(OBJDIR)/%.o=$(BUILD_DIR)/%.d)
+OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(BUILD_DIR)/%.o)
+DEP = $(OBJ:$(BUILD_DIR)/%.o=$(BUILD_DIR)/%.d)
 # UNIX-based OS variables & settings
 RM = rm
 DELOBJ = $(OBJ)
 # Windows OS variables & settings
 DEL = del
 EXE = .exe
-WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(BUILD_DIR)\\%.o)
 
 ########################################################################
 ####################### Targets beginning here #########################
@@ -41,13 +40,13 @@ $(BUILD_DIR)/$(APPNAME): $(OBJ)
 
 # Creates the dependecy rules
 $(BUILD_DIR)/%.d: $(SRCDIR)/%$(EXT)
-	@$(CPP) $(CFLAGS) $< -MM -MT $(@:%.d=$(OBJDIR)/%.o) >$@
+	@$(CPP) $(CFLAGS) $< -MM -MT $(@:%.d=$(BUILD_DIR)/%.o) >$@
 
 # Includes all .h files
 -include $(DEP)
 
 # Building rule for .o files and its .c/.cpp in combination with all .h
-$(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
+$(BUILD_DIR)/%.o: $(SRCDIR)/%$(EXT)
 	$(CC) $(CXXFLAGS) -o $@ -c $<
 
 ################### Cleaning rules for Unix-based OS ###################

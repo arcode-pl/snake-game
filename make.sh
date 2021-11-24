@@ -1,3 +1,4 @@
+mkdir ./target
 make clean
 make
 rm ./snake-game
