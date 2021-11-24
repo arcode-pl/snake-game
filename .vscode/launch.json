@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/snake-game",
+            "program": "${workspaceFolder}/target/snake-game",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
