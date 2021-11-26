@@ -1,34 +1,9 @@
 {
     "files.associations": {
-        "getopt.h": "c",
-        "sdl.h": "c",
-        "socket.h": "c",
-        "app_confg.h": "c",
-        "sdl_version.h": "c",
-        "sdl2_wrapper.h": "c",
-        "sdl_ttf.h": "c",
-        "snakeapp.h": "c",
-        "socketutil.h": "c",
-        "appconfg.h": "c",
-        "cctype": "c",
-        "cmath": "c",
-        "cstdarg": "c",
-        "cstdio": "c",
-        "cstdlib": "c",
-        "cwchar": "c",
-        "type_traits": "c",
-        "limits": "c",
-        "*.tcc": "c",
-        "cinttypes": "c",
-        "cstdint": "c",
-        "typeinfo": "c",
-        "sdl2util.h": "c",
-        "appconfig.h": "c",
-        "time.h": "c",
-        "inet.h": "c",
-        "stdbool.h": "c",
-        "string.h": "c"
+        "*.h": "c",
+        "*.c": "c",
     },
+    "editor.formatOnSave": true,
     "makefile.launchConfigurations": [
         {
             "cwd": "/home/ea/snake-game",
@@ -38,12 +13,16 @@
         {
             "cwd": "/home/ea/snake-game",
             "binaryPath": "/home/ea/snake-game/snake-game",
-            "binaryArgs": ["--remote 127.0.0.1"]
+            "binaryArgs": [
+                "--remote 127.0.0.1"
+            ]
         },
         {
             "cwd": "/home/ea/snake-game",
             "binaryPath": "/home/ea/snake-game/snake-game",
-            "binaryArgs": ["-r 127.0.0.1"]
+            "binaryArgs": [
+                "-r 127.0.0.1"
+            ]
         },
     ]
 }

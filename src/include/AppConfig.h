@@ -4,8 +4,12 @@
 #define SCREEN_X_SIZE 800
 #define SCREEN_Y_SIZE 600
 
+#define OPT_TRUE 1
+#define OPT_FALSE 0
+
 #define DEFAULT_SERVER_IP "127.0.0.1"
 #define DEFAULT_SERVER_PORT 8080
-#define DEFAULT_MAX_CLIENTS 3
+#define MAX_PLAYERS 4
+#define MAX_CLIENTS (MAX_PLAYERS - 1)
 
 #endif

@@ -1,7 +1,8 @@
 #ifndef SNAKE_APP_H
 #define SNAKE_APP_H
 
-typedef struct SnakeApp_config {
+typedef struct SnakeApp_config
+{
     char ip[16];
     int port;
     int maxClients;
