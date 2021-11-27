@@ -12,7 +12,9 @@
 
 static Sdl2Util_t sdl;
 static SocketUtil_t su;
-static SDL_Color colors[4] = {RED, GREEN, BLUE, WHITE};
+static SocketUtil_comm_t comm;
+static SocketUtil_comm_t clientComm;
+static SDL_Color colors[4] = {GREEN, RED, BLUE, WHITE};
 
 #define BOARD_RECT \
     (SDL_Rect) { 0, 0, SCREEN_X_SIZE, SCREEN_Y_SIZE }
@@ -25,6 +27,8 @@ typedef struct Snake_map
 
 static Snake_map_t snakeMap;
 static bool isServer;
+
+static int currentPlayer;
 
 static void drawSnake(Sdl2Util_t *sdl, Snake_t *snake, SDL_Color color);
 
@@ -46,18 +50,34 @@ static int snakeApp_initSocket(SnakeApp_config_t *config)
     }
 }
 
+static bool snakeApp_isPlayerValid(int player)
+{
+    return (player >= 0 && player < MAX_PLAYERS);
+}
+
+static bool snakeApp_isSnakeValid(Snake_t *snake)
+{
+    if (snake->head == NULL || snake->tail == NULL || !snakeApp_isPlayerValid(snake->player))
+    {
+        printf("Snake invisible now");
+        return false;
+    }
+
+    return true;
+}
+
 static void snakeApp_initSnakes(void)
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        Snake_t *s = &(snakeMap.snakes[i]);
-        Snake_init(s);
+        Snake_t *snake = &(snakeMap.snakes[i]);
+        Snake_init(snake);
     }
 }
 
 static int snakeApp_startPlayer(void)
 {
-    for (int i = 0; i < MAX_PLAYERS; i++)
+    for (int i = 1; i < MAX_PLAYERS; i++)
     {
         Snake_t *snake = &(snakeMap.snakes[i]);
         if (snake->player < 0)
@@ -67,6 +87,7 @@ static int snakeApp_startPlayer(void)
             snake->size = SNAKE_NODE;
             snake->player = i;
             Snake_spawn(snake, x, y);
+            printf("Player %d start game at %d x %d\n", i, x, y);
             return i;
         }
     }
@@ -75,43 +96,51 @@ static int snakeApp_startPlayer(void)
     return -1;
 }
 
-static void snakeApp_endPlayer(int player, bool restart)
+static void snakeApp_endPlayer(int player)
 {
-    for (int i = 0; i < MAX_PLAYERS; i++)
+    if (snakeApp_isPlayerValid(player))
     {
-        Snake_t *snake = &(snakeMap.snakes[i]);
+        Snake_t *snake = &(snakeMap.snakes[player]);
         if (snake->player == player)
         {
             Snake_destroy(snake);
             Snake_init(snake);
-            if (restart)
-            {
-                snake->player = i;
-            }
         }
     }
 }
 
-static void snakeApp_moveAction(int player, int action)
+static void snakeApp_moveAction(int player, int direction)
 {
-    for (int i = 0; i < MAX_PLAYERS; i++)
+    if (snakeApp_isPlayerValid(player))
     {
-        Snake_t *snake = &(snakeMap.snakes[i]);
+        snakeMap.snakes[player].head->dir = direction;
+    }
+}
+
+static void snakeApp_increaseSnake(int player, int size)
+{
+    if (snakeApp_isPlayerValid(player))
+    {
+        Snake_t *snake = &(snakeMap.snakes[player]);
         if (snake->player == player)
         {
-            snake->head->dir = action;
+            Snake_increase(snake, size);
+            Snake_printNodesFromHead(snake);
+            Snake_printNodesFromTail(snake);
         }
     }
 }
 
-static void snakeApp_eatFood(int player)
+static void snakeApp_decreaseSnake(int player, int size)
 {
-    for (int i = 0; i < MAX_PLAYERS; i++)
+    if (snakeApp_isPlayerValid(player))
     {
-        Snake_t *snake = &(snakeMap.snakes[i]);
+        Snake_t *snake = &(snakeMap.snakes[player]);
         if (snake->player == player)
         {
-            Snake_grow(snake);
+            Snake_decrease(snake, size);
+            Snake_printNodesFromHead(snake);
+            Snake_printNodesFromTail(snake);
         }
     }
 }
@@ -120,24 +149,53 @@ static void snakeApp_drawSnakes()
 {
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
-        Snake_t *s = &(snakeMap.snakes[i]);
-        if (s->player >= 0)
+        Snake_t *snake = &(snakeMap.snakes[i]);
+        if (snake->player >= 0)
         {
-            drawSnake(&sdl, s, colors[i]);
+            drawSnake(&sdl, snake, colors[i]);
         }
     }
 }
 
-static void snakeApp_processNetwork(int *action)
+void SnakeApp_processAction(int player, int action)
 {
-    // if (isServer)
-    // {
-    //     SocketUtil_listenAndSend(&su, &snakeMap, action);
-    // }
-    // else
-    // {
-    //     SocketUtil_sendAndReceive(&su, &snakeMap, action);
-    // }
+    switch (action)
+    {
+    case MOVE_UP_ACTION:
+        snakeApp_moveAction(player, UP);
+        break;
+    case MOVE_DOWN_ACTION:
+        snakeApp_moveAction(player, DOWN);
+        break;
+    case MOVE_LEFT_ACTION:
+        snakeApp_moveAction(player, LEFT);
+        break;
+    case MOVE_RIGHT_ACTION:
+        snakeApp_moveAction(player, RIGHT);
+        break;
+    case INCRASE_SNAKE_ACTION:
+        snakeApp_increaseSnake(player, SMALL_FOOD);
+        break;
+    case REDUCE_SNAKE_ACTION:
+        snakeApp_decreaseSnake(player, SMALL_FOOD);
+        break;
+    case END_SNAKE_ACTION:
+        snakeApp_endPlayer(player);
+        player = -1;
+        break;
+    case NEW_SNAKE_ACTION:
+        if (player < 0)
+        {
+            player = snakeApp_startPlayer();
+        }
+        else
+        {
+            printf("Player already exist\n");
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 int SnakeApp_run(SnakeApp_config_t *config)
@@ -154,12 +212,7 @@ int SnakeApp_run(SnakeApp_config_t *config)
     }
 
     snakeApp_initSnakes();
-    int player = snakeApp_startPlayer();
-    snakeApp_moveAction(player, MOVE_LEFT_ACTION);
-    snakeApp_eatFood(player);
-    snakeApp_eatFood(player);
-    snakeApp_eatFood(player);
-    snakeApp_drawSnakes();
+    //currentPlayer = snakeApp_startPlayer();
 
     bool quit = false;
     while (quit == false)
@@ -167,22 +220,60 @@ int SnakeApp_run(SnakeApp_config_t *config)
         int action = Sdl2Util_poolEvent(&sdl);
         if (action == QUIT_ACTION)
         {
+            printf("Quit action\n");
             quit = true;
         }
 
+        int len;
+        if (isServer)
+        {
+            if (SocketUtil_receive(&su, &comm) > 0)
+            {
+                SocketUtil_send(&su, &comm);
+            }
+        }
+        else
+        {
+            comm.command = ACTION_COMMAND;
+            comm.data[0] = action;
+            comm.len = 1;
+            SocketUtil_send(&su, &comm);
+            SocketUtil_receive(&su, &comm);
+        }
+
+        // if (isServer) //process locally and send to clients if need
+        // {
+        //     SocketUtil_listenClients(&su, &clientComm, DEFAULT_LISTEN_TIMEOUT_US);
+        //     // for (int i = 0; i < MAX_PLAYERS; i++)
+        //     // {
+        //     // }
+        // }
+        // else
+        // {
+        //     if (action != NONE_ACTION)
+        //     {
+        //         comm.command = ACTION_COMMAND;
+        //         comm.data[0] = action;
+        //         comm.len = 1;
+        //         SocketUtil_sendAndReceiveAction(&su, &comm);
+        //     }
+        // }
+
+        // if (isServer)
+        // {
+        //     SnakeApp_processAction(0, NONE_ACTION);
+        //     SnakeApp_processAction(1, NONE_ACTION);
+        //     SnakeApp_processAction(2, NONE_ACTION);
+        //     SnakeApp_processAction(3, NONE_ACTION);
+        // }
+
+        //= > get actions from clients
+        //<= send snake maps from server
+
         Sdl2Util_clean(&sdl, BLACK);
         Sdl2Util_drawBoard(&sdl, BOARD_RECT, BLOCK_SIZE, BLUE, RED);
-
         snakeApp_drawSnakes();
-        //snakeApp_processNetwork(&action);
-
-        //Sdl2Util_drawBoard(&sdl, BOARD_RECT, BLOCK_SIZE, BLUE, RED);
-
-        //draw snakes from map
-        // Sdl2Util_draw(&snakeMap);
-
-        //update
-        Sdl2Util_update(&sdl);
+        Sdl2Util_update(&sdl, DEFAULT_RENDERING_DELAY_MS);
     }
 
     Sdl2Util_dispose(&sdl);
@@ -192,34 +283,33 @@ int SnakeApp_run(SnakeApp_config_t *config)
 
 static void drawSnake(Sdl2Util_t *sdl, Snake_t *snake, SDL_Color color)
 {
-    Snake_node_t *node = snake->tail;
-
-    Sdl2Util_setRendererColor(sdl, color);
-    while (node != snake->head)
+    if (!snakeApp_isSnakeValid(snake))
     {
-        Sdl2Util_drawPoint(sdl, node->x, node->y, SNAKE_NODE);
-        switch (node->dir)
-        {
-        case UP:
-            node->y -= snake->speed;
-            break;
-        case DOWN:
-            node->y += snake->speed;
-            break;
-        case RIGHT:
-            node->x += snake->speed;
-            break;
-        case LEFT:
-            node->x -= snake->speed;
-            break;
-        default:
-            break;
-        }
-        node = node->prev;
+        return;
     }
+
+    Snake_node_t *node = snake->head;
 
     SDL_Point point;
     point.x = node->x;
     point.y = node->y;
-    Sdl2Util_drawCircle(sdl, point, BLOCK_SIZE * 1.5, color);
+    Sdl2Util_drawCircle(sdl, point, BLOCK_SIZE * 1, color);
+
+    switch (node->dir)
+    {
+    case UP:
+        node->y -= snake->speed;
+        break;
+    case DOWN:
+        node->y += snake->speed;
+        break;
+    case RIGHT:
+        node->x += snake->speed;
+        break;
+    case LEFT:
+        node->x -= snake->speed;
+        break;
+    default:
+        break;
+    }
 }

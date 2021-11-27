@@ -34,13 +34,13 @@ typedef struct Sdl2Util
 int Sdl2Util_initialize(Sdl2Util_t *sdl);
 int Sdl2Util_poolEvent(Sdl2Util_t *sdl);
 void Sdl2Util_clean(Sdl2Util_t *sdl, SDL_Color color);
-void Sdl2Util_update(Sdl2Util_t *sdl);
+void Sdl2Util_update(Sdl2Util_t *sdl, int delayMs);
 void Sdl2Util_dispose(Sdl2Util_t *sdl);
 
 void Sdl2Util_setRendererColor(Sdl2Util_t *sdl, SDL_Color color);
 void Sdl2Util_drawBoard(Sdl2Util_t *sdl, SDL_Rect rect, int blockSize, SDL_Color field, SDL_Color border);
 void Sdl2Util_drawCircle(Sdl2Util_t *sdl, SDL_Point point, int radius, SDL_Color color);
 void Sdl2Util_showText(Sdl2Util_t *sdl, char *text, SDL_Color textColor, SDL_Color backColor);
-void Sdl2Util_drawPoint(Sdl2Util_t *sdl, int cx, int cy, int side);
+void Sdl2Util_drawNode(Sdl2Util_t *sdl, int cx, int cy, int size, SDL_Color color);
 
 #endif

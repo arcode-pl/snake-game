@@ -6,7 +6,8 @@
 
 void Snake_init(Snake_t *snake)
 {
-    snake->head = snake->tail = NULL;
+    snake->head = NULL;
+    snake->tail = NULL;
     snake->speed = START_SPEED;
     snake->dir = ND;
     snake->player = -1;
@@ -25,65 +26,136 @@ void Snake_spawn(Snake_t *snake, int x, int y)
     snake->tail = snake->head;
 }
 
-int Snake_grow(Snake_t *snake)
+static Snake_node_t *snake_createNode()
 {
     Snake_node_t *node = (Snake_node_t *)malloc(sizeof(Snake_node_t));
-    if (node == NULL)
-    {
-        printf("Not enough RAM!\n");
-        return -1;
-    }
-    node->next = NULL;
-    node->prev = NULL;
+    return node;
+}
 
-    Snake_node_t *tmp = snake->head;
-    while (tmp->next)
+void Snake_printNodesFromHead(Snake_t *snake)
+{
+    Snake_node_t *node = snake->head;
+    printf("from head:\n");
+    while (node != NULL && node != snake->tail)
     {
-        tmp = tmp->next;
+        printf("node: 0x%p / next: 0x%p\n", node, node->next);
+        printf("x: %d, y: %d, dir: %d\n", node->x, node->y, node->dir);
+        node = node->next;
     }
-    tmp->next = node;
-    tmp->next->dir = tmp->dir;
+}
 
-    switch (tmp->dir)
+void Snake_printNodesFromTail(Snake_t *snake)
+{
+    Snake_node_t *node = snake->tail;
+    printf("from tail:\n");
+    while (node != NULL && node != snake->head)
+    {
+        printf("node: 0x%p / prev: 0x%p\n", node, node->prev);
+        printf("x: %d, y: %d, dir: %d\n", node->x, node->y, node->dir);
+        node = node->prev;
+    }
+}
+
+static void snake_calcNewTail(Snake_node_t *node)
+{
+    node->dir = node->prev->dir;
+
+    switch (node->dir)
     {
     case UP:
-        tmp->next->x = tmp->x;
-        tmp->next->y = tmp->y + BLOCK_SIZE;
+        node->x = node->prev->x;
+        node->y = node->prev->y + BLOCK_SIZE;
         break;
     case DOWN:
-        tmp->next->x = tmp->x;
-        tmp->next->y = tmp->y - BLOCK_SIZE;
-        break;
-    case RIGHT:
-        tmp->next->x = tmp->x - BLOCK_SIZE;
-        tmp->next->y = tmp->y;
+        node->x = node->prev->x;
+        node->y = node->prev->y - BLOCK_SIZE;
         break;
     case LEFT:
-        tmp->next->x = tmp->x + BLOCK_SIZE;
-        tmp->next->y = tmp->y;
+        node->x = node->prev->x - BLOCK_SIZE;
+        node->y = node->prev->y;
+        break;
+    case RIGHT:
+        node->x = node->prev->x + BLOCK_SIZE;
+        node->y = node->prev->y;
         break;
     default:
         break;
     }
-    tmp->next->prev = tmp;
-    snake->tail = node;
+}
+
+int Snake_increase(Snake_t *snake, int size)
+{
+    if (size <= 0 || size > 10)
+    {
+        printf("Valid snake increase range is from 1 to 10\n");
+        return -1;
+    }
+
+    if (snake->head->dir == ND)
+    {
+        printf("Can't add node when snake is paused\n");
+        return -1;
+    }
+
+    for (int i = 0; i < size; i++)
+    {
+        Snake_node_t *new = snake_createNode();
+        if (new == NULL)
+        {
+            printf("Not enough RAM!\n");
+            return -1;
+        }
+
+        snake->tail->next = new;
+        new->prev = snake->tail;
+        new->next = NULL;
+        snake->tail = new;
+
+        snake_calcNewTail(new);
+    }
 
     return 0;
 }
 
-static void snake_destroyAllNodes(Snake_node_t *node)
+int Snake_decrease(Snake_t *snake, int size)
+{
+    if (size <= 0 || size > 10)
+    {
+        printf("Valid snake increase range is from 1 to 10\n");
+        return -1;
+    }
+
+    for (int i = 0; i < size; i++)
+    {
+        Snake_node_t *node = snake->tail;
+        if (node->prev != NULL)
+        {
+            snake->tail = snake->tail->prev;
+            snake->tail->next = NULL;
+            free(node);
+        }
+    }
+
+    return 0;
+}
+
+static void snake_destroyAllNextNodes(Snake_node_t *node)
 {
     if (node == NULL)
     {
         return;
     }
-
-    snake_destroyAllNodes(node->next);
+    snake_destroyAllNextNodes(node->next);
     free(node);
 }
 
 void Snake_destroy(Snake_t *snake)
 {
     Snake_node_t *node = snake->head;
-    snake_destroyAllNodes(node);
+    if (node == NULL)
+    {
+        printf("Snake already destroyed\n");
+        return;
+    }
+    snake_destroyAllNextNodes(node);
 }

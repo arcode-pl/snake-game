@@ -14,10 +14,11 @@ void Sdl2Util_clean(Sdl2Util_t *sdl, SDL_Color color)
 	SDL_RenderClear(sdl->renderer);
 }
 
-void Sdl2Util_update(Sdl2Util_t *sdl)
+void Sdl2Util_update(Sdl2Util_t *sdl, int delayMs)
 {
 	SDL_RenderPresent(sdl->renderer);
 	SDL_GL_SwapWindow(sdl->window);
+	SDL_Delay(delayMs);
 }
 
 int Sdl2Util_poolEvent(Sdl2Util_t *sdl)
@@ -30,11 +31,13 @@ int Sdl2Util_poolEvent(Sdl2Util_t *sdl)
 		switch (e.type)
 		{
 		case SDL_QUIT:
+		{
 			printf("SDL_QUIT\n");
 			action = QUIT_ACTION;
 			break;
+		}
 		case SDL_KEYDOWN:
-			printf("SDL_KEYDOWN\n");
+		{
 			SDL_Keycode keyCode = e.key.keysym.sym;
 
 			switch (keyCode)
@@ -44,24 +47,44 @@ int Sdl2Util_poolEvent(Sdl2Util_t *sdl)
 				action = QUIT_ACTION;
 				break;
 			case SDLK_UP:
+				printf("MOVE_UP_ACTION\n");
 				action = MOVE_UP_ACTION;
 				break;
 			case SDLK_DOWN:
+				printf("MOVE_DOWN_ACTION\n");
 				action = MOVE_DOWN_ACTION;
 				break;
 			case SDLK_LEFT:
+				printf("MOVE_LEFT_ACTION\n");
 				action = MOVE_LEFT_ACTION;
 				break;
 			case SDLK_RIGHT:
+				printf("MOVE_RIGHT_ACTION\n");
 				action = MOVE_RIGHT_ACTION;
 				break;
-
+			case SDLK_KP_PLUS:
+				printf("INCRASE_SNAKE_ACTION\n");
+				action = INCRASE_SNAKE_ACTION;
+				break;
+			case SDLK_KP_MINUS:
+				printf("REDUCE_SNAKE_ACTION\n");
+				action = REDUCE_SNAKE_ACTION;
+				break;
+			case SDLK_DELETE:
+				printf("END_SNAKE_ACTION\n");
+				action = END_SNAKE_ACTION;
+				break;
+			case SDLK_INSERT:
+				printf("NEW_SNAKE_ACTION\n");
+				action = NEW_SNAKE_ACTION;
+				break;
 			default:
 				break;
 			}
 
+			printf("SDL_KEYDOWN\n");
 			break;
-
+		}
 		default:
 			break;
 		}
@@ -134,8 +157,9 @@ void Sdl2Util_showText(Sdl2Util_t *sdl, char *text, SDL_Color textColor, SDL_Col
 	SDL_RenderCopy(sdl->renderer, tex, NULL, &R1);
 }
 
-void Sdl2Util_drawPoint(Sdl2Util_t *sdl, int cx, int cy, int size)
+void Sdl2Util_drawNode(Sdl2Util_t *sdl, int cx, int cy, int size, SDL_Color color)
 {
+	Sdl2Util_setRendererColor(sdl, color);
 	int x = cx + size;
 	int y1 = cy - size;
 	int y2 = cy + size;

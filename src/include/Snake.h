@@ -5,6 +5,10 @@
 #define BLOCK_SIZE 8
 #define SNAKE_NODE BLOCK_SIZE - 2
 
+#define SMALL_FOOD 1
+#define MID_FOOD 3
+#define BIG_FOOD 10
+
 typedef enum Snake_direction
 {
     ND,
@@ -32,17 +36,26 @@ typedef struct Snake
 
 typedef enum Snake_action
 {
-    NONE_ACTION = 0,
-    QUIT_ACTION = 1,
-    MOVE_LEFT_ACTION = 2,
-    MOVE_RIGHT_ACTION = 3,
-    MOVE_UP_ACTION = 4,
-    MOVE_DOWN_ACTION = 5,
+    NONE_ACTION,
+    QUIT_ACTION,
+    PAUSE_ACTION,
+    MOVE_LEFT_ACTION,
+    MOVE_RIGHT_ACTION,
+    MOVE_UP_ACTION,
+    MOVE_DOWN_ACTION,
+    INCRASE_SNAKE_ACTION,
+    REDUCE_SNAKE_ACTION,
+    NEW_SNAKE_ACTION,
+    END_SNAKE_ACTION,
 } Snake_action_t;
 
 void Snake_init(Snake_t *snake);
 void Snake_spawn(Snake_t *snake, int x, int y);
-int Snake_grow(Snake_t *snake);
+int Snake_increase(Snake_t *snake, int size);
+int Snake_decrease(Snake_t *snake, int size);
 void Snake_destroy(Snake_t *snake);
+
+void Snake_printNodesFromHead(Snake_t *snake);
+void Snake_printNodesFromTail(Snake_t *snake);
 
 #endif
