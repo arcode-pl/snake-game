@@ -177,9 +177,11 @@ void SnakeApp_processAction(int player, int action)
         snakeApp_moveAction(player, RIGHT);
         break;
     case INCRASE_SNAKE_ACTION:
+    case INCRASE_SNAKE_ACTION_2:
         snakeApp_increaseSnake(player, SMALL_FOOD);
         break;
     case REDUCE_SNAKE_ACTION:
+    case REDUCE_SNAKE_ACTION_2:
         snakeApp_decreaseSnake(player, SMALL_FOOD);
         break;
     case END_SNAKE_ACTION:
@@ -209,6 +211,8 @@ static inline bool isPlayer1(int action)
     case MOVE_DOWN_ACTION:
     case MOVE_LEFT_ACTION:
     case MOVE_RIGHT_ACTION:
+    case INCRASE_SNAKE_ACTION:
+    case REDUCE_SNAKE_ACTION:
         return true;
     default:
         return false;
@@ -223,6 +227,8 @@ static inline bool isPlayer2(int action)
     case MOVE_DOWN_ACTION_2:
     case MOVE_LEFT_ACTION_2:
     case MOVE_RIGHT_ACTION_2:
+    case INCRASE_SNAKE_ACTION_2:
+    case REDUCE_SNAKE_ACTION_2:
         return true;
     default:
         return false;

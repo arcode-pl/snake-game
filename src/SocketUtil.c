@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <netinet/in.h>
+#include <unistd.h>
 
 #include "include/AppConfig.h"
 #include "include/SocketUtil.h"

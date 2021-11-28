@@ -46,6 +46,9 @@ int Sdl2Util_poolEvent(Sdl2Util_t *sdl)
 				printf("SDL_KEYDOWN:SDLK_q\n");
 				action = QUIT_ACTION;
 				break;
+				/************/
+				/* PLAYER 1 */
+				/************/
 			case SDLK_UP:
 				printf("MOVE_UP_ACTION\n");
 				action = MOVE_UP_ACTION;
@@ -62,6 +65,25 @@ int Sdl2Util_poolEvent(Sdl2Util_t *sdl)
 				printf("MOVE_RIGHT_ACTION\n");
 				action = MOVE_RIGHT_ACTION;
 				break;
+			case SDLK_KP_PLUS:
+				printf("INCRASE_SNAKE_ACTION\n");
+				action = INCRASE_SNAKE_ACTION;
+				break;
+			case SDLK_KP_MINUS:
+				printf("REDUCE_SNAKE_ACTION\n");
+				action = REDUCE_SNAKE_ACTION;
+				break;
+			case SDLK_DELETE:
+				printf("END_SNAKE_ACTION\n");
+				action = END_SNAKE_ACTION;
+				break;
+			case SDLK_INSERT:
+				printf("NEW_SNAKE_ACTION\n");
+				action = NEW_SNAKE_ACTION;
+				break;
+				/************/
+				/* PLAYER 2 */
+				/************/
 			case SDLK_w:
 				printf("MOVE_UP_ACTION_2\n");
 				action = MOVE_UP_ACTION_2;
@@ -78,21 +100,13 @@ int Sdl2Util_poolEvent(Sdl2Util_t *sdl)
 				printf("MOVE_RIGHT_ACTION_2\n");
 				action = MOVE_RIGHT_ACTION_2;
 				break;
-			case SDLK_KP_PLUS:
-				printf("INCRASE_SNAKE_ACTION\n");
-				action = INCRASE_SNAKE_ACTION;
+			case SDLK_e:
+				printf("INCRASE_SNAKE_ACTION_2\n");
+				action = INCRASE_SNAKE_ACTION_2;
 				break;
-			case SDLK_KP_MINUS:
-				printf("REDUCE_SNAKE_ACTION\n");
-				action = REDUCE_SNAKE_ACTION;
-				break;
-			case SDLK_DELETE:
-				printf("END_SNAKE_ACTION\n");
-				action = END_SNAKE_ACTION;
-				break;
-			case SDLK_INSERT:
-				printf("NEW_SNAKE_ACTION\n");
-				action = NEW_SNAKE_ACTION;
+			case SDLK_r:
+				printf("REDUCE_SNAKE_ACTION_2\n");
+				action = REDUCE_SNAKE_ACTION_2;
 				break;
 			default:
 				break;
