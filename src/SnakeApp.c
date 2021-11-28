@@ -291,12 +291,118 @@ int SnakeApp_run(SnakeApp_config_t *config)
     return 0;
 }
 
+static void drawSnakeTest(Sdl2Util_t *sdl, Snake_t *s, SDL_Color color)
+{
+    Snake_node_t *n;
+
+    for (int i = 0; i < BLOCK_SIZE / s->speed; i++)
+    {
+        n = s->tail;
+        while (n != s->head)
+        {
+            Sdl2Util_drawNode(sdl, n->x, n->y, SNAKE_NODE, color);
+            switch (n->dir)
+            {
+            case UP:
+                n->y -= s->speed;
+                break;
+            case DOWN:
+                n->y += s->speed;
+                break;
+            case RIGHT:
+                n->x += s->speed;
+                break;
+            case LEFT:
+                n->x -= s->speed;
+                break;
+            default:
+                break;
+            }
+            n = n->prev;
+        }
+
+        SDL_Point point;
+        point.x = n->x;
+        point.y = n->y;
+        Sdl2Util_drawCircle(sdl, point, BLOCK_SIZE * 1.5, color);
+
+        switch (s->head->dir)
+        {
+        case UP:
+            s->head->y -= s->speed;
+            break;
+        case DOWN:
+            s->head->y += s->speed;
+            break;
+        case RIGHT:
+            s->head->x += s->speed;
+            break;
+        case LEFT:
+            s->head->x -= s->speed;
+            break;
+        default:
+            break;
+        }
+    }
+
+    n = s->tail;
+    while (n != s->head)
+    {
+        Sdl2Util_drawNode(sdl, n->x, n->y, SNAKE_NODE, color);
+        switch (n->dir)
+        {
+        case UP:
+            n->y -= BLOCK_SIZE % s->speed;
+            break;
+        case DOWN:
+            n->y += BLOCK_SIZE % s->speed;
+            break;
+        case RIGHT:
+            n->x += BLOCK_SIZE % s->speed;
+            break;
+        case LEFT:
+            n->x -= BLOCK_SIZE % s->speed;
+            break;
+        default:
+            break;
+        }
+        n = n->prev;
+    }
+
+    SDL_Point point;
+    point.x = n->x;
+    point.y = n->y;
+    Sdl2Util_drawCircle(sdl, point, BLOCK_SIZE * 1.5, color);
+
+    switch (s->head->dir)
+    {
+    case UP:
+        s->head->y -= BLOCK_SIZE % s->speed;
+        break;
+    case DOWN:
+        s->head->y += BLOCK_SIZE % s->speed;
+        break;
+    case RIGHT:
+        s->head->x += BLOCK_SIZE % s->speed;
+        break;
+    case LEFT:
+        s->head->x -= BLOCK_SIZE % s->speed;
+        break;
+    default:
+        break;
+    }
+}
+
 static void drawSnake(Sdl2Util_t *sdl, Snake_t *snake, SDL_Color color)
 {
     if (!snakeApp_isSnakeValid(snake))
     {
         return;
     }
+
+    drawSnakeTest(sdl, snake, color);
+
+    return;
 
     Snake_node_t *node = snake->head;
 
