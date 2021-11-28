@@ -12,8 +12,6 @@
 
 static Sdl2Util_t sdl;
 static SocketUtil_t su;
-static SocketUtil_comm_t comm;
-static SocketUtil_comm_t clientComm;
 static SDL_Color colors[4] = {GREEN, RED, BLUE, WHITE};
 
 #define BOARD_RECT \
@@ -28,7 +26,8 @@ typedef struct Snake_map
 static Snake_map_t snakeMap;
 static bool isServer;
 
-static int currentPlayer;
+static int player1;
+static int player2;
 
 static void drawSnake(Sdl2Util_t *sdl, Snake_t *snake, SDL_Color color);
 
@@ -77,7 +76,7 @@ static void snakeApp_initSnakes(void)
 
 static int snakeApp_startPlayer(void)
 {
-    for (int i = 1; i < MAX_PLAYERS; i++)
+    for (int i = 0; i < MAX_PLAYERS; i++)
     {
         Snake_t *snake = &(snakeMap.snakes[i]);
         if (snake->player < 0)
@@ -162,15 +161,19 @@ void SnakeApp_processAction(int player, int action)
     switch (action)
     {
     case MOVE_UP_ACTION:
+    case MOVE_UP_ACTION_2:
         snakeApp_moveAction(player, UP);
         break;
     case MOVE_DOWN_ACTION:
+    case MOVE_DOWN_ACTION_2:
         snakeApp_moveAction(player, DOWN);
         break;
     case MOVE_LEFT_ACTION:
+    case MOVE_LEFT_ACTION_2:
         snakeApp_moveAction(player, LEFT);
         break;
     case MOVE_RIGHT_ACTION:
+    case MOVE_RIGHT_ACTION_2:
         snakeApp_moveAction(player, RIGHT);
         break;
     case INCRASE_SNAKE_ACTION:
@@ -198,6 +201,34 @@ void SnakeApp_processAction(int player, int action)
     }
 }
 
+static inline bool isPlayer1(int action)
+{
+    switch (action)
+    {
+    case MOVE_UP_ACTION:
+    case MOVE_DOWN_ACTION:
+    case MOVE_LEFT_ACTION:
+    case MOVE_RIGHT_ACTION:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static inline bool isPlayer2(int action)
+{
+    switch (action)
+    {
+    case MOVE_UP_ACTION_2:
+    case MOVE_DOWN_ACTION_2:
+    case MOVE_LEFT_ACTION_2:
+    case MOVE_RIGHT_ACTION_2:
+        return true;
+    default:
+        return false;
+    }
+}
+
 int SnakeApp_run(SnakeApp_config_t *config)
 {
     if (snakeApp_initSocket(config) < 0)
@@ -211,8 +242,9 @@ int SnakeApp_run(SnakeApp_config_t *config)
         return -1;
     }
 
+    player1 = -1;
+    player2 = -1;
     snakeApp_initSnakes();
-    //currentPlayer = snakeApp_startPlayer();
 
     bool quit = false;
     while (quit == false)
@@ -224,51 +256,23 @@ int SnakeApp_run(SnakeApp_config_t *config)
             quit = true;
         }
 
-        int len;
-        if (isServer)
+        if (isPlayer1(action))
         {
-            if (SocketUtil_receive(&su, &comm) > 0)
+            if (player1 == -1)
             {
-                SocketUtil_send(&su, &comm);
+                player1 = snakeApp_startPlayer();
             }
+            SnakeApp_processAction(player1, action);
         }
-        else
+
+        if (isPlayer2(action))
         {
-            comm.command = ACTION_COMMAND;
-            comm.data[0] = action;
-            comm.len = 1;
-            SocketUtil_send(&su, &comm);
-            SocketUtil_receive(&su, &comm);
+            if (player2 == -1)
+            {
+                player2 = snakeApp_startPlayer();
+            }
+            SnakeApp_processAction(player2, action);
         }
-
-        // if (isServer) //process locally and send to clients if need
-        // {
-        //     SocketUtil_listenClients(&su, &clientComm, DEFAULT_LISTEN_TIMEOUT_US);
-        //     // for (int i = 0; i < MAX_PLAYERS; i++)
-        //     // {
-        //     // }
-        // }
-        // else
-        // {
-        //     if (action != NONE_ACTION)
-        //     {
-        //         comm.command = ACTION_COMMAND;
-        //         comm.data[0] = action;
-        //         comm.len = 1;
-        //         SocketUtil_sendAndReceiveAction(&su, &comm);
-        //     }
-        // }
-
-        // if (isServer)
-        // {
-        //     SnakeApp_processAction(0, NONE_ACTION);
-        //     SnakeApp_processAction(1, NONE_ACTION);
-        //     SnakeApp_processAction(2, NONE_ACTION);
-        //     SnakeApp_processAction(3, NONE_ACTION);
-        // }
-
-        //= > get actions from clients
-        //<= send snake maps from server
 
         Sdl2Util_clean(&sdl, BLACK);
         Sdl2Util_drawBoard(&sdl, BOARD_RECT, BLOCK_SIZE, BLUE, RED);

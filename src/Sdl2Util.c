@@ -62,6 +62,22 @@ int Sdl2Util_poolEvent(Sdl2Util_t *sdl)
 				printf("MOVE_RIGHT_ACTION\n");
 				action = MOVE_RIGHT_ACTION;
 				break;
+			case SDLK_w:
+				printf("MOVE_UP_ACTION_2\n");
+				action = MOVE_UP_ACTION_2;
+				break;
+			case SDLK_s:
+				printf("MOVE_DOWN_ACTION_2\n");
+				action = MOVE_DOWN_ACTION_2;
+				break;
+			case SDLK_a:
+				printf("MOVE_LEFT_ACTION_2\n");
+				action = MOVE_LEFT_ACTION_2;
+				break;
+			case SDLK_d:
+				printf("MOVE_RIGHT_ACTION_2\n");
+				action = MOVE_RIGHT_ACTION_2;
+				break;
 			case SDLK_KP_PLUS:
 				printf("INCRASE_SNAKE_ACTION\n");
 				action = INCRASE_SNAKE_ACTION;
